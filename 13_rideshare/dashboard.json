@@ -1,0 +1,205 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "description": "Requests/s für die Order-Endpunkte (bike/scooter/car) – aus rideshare.http.order",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": [] } },
+      "targets": [
+        {
+          "expr": "sum by (vehicle, radius) (rate(rideshare_http_order_seconds_count{application=~\"$application\", instance=~\"$instance\"}[2m]))",
+          "legendFormat": "{{vehicle}} r={{radius}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Order Throughput (req/s)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "P50/P95/P99 Latenz (Histogram) für rideshare.http.order",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": [] } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum by (le) (rate(rideshare_http_order_seconds_bucket{application=~\"$application\", instance=~\"$instance\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(rideshare_http_order_seconds_bucket{application=~\"$application\", instance=~\"$instance\"}[5m])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(rideshare_http_order_seconds_bucket{application=~\"$application\", instance=~\"$instance\"}[5m])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "title": "Order Latency (p50/p95/p99)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Heap / Non-Heap used",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": [] } },
+      "targets": [
+        {
+          "expr": "sum by (area) (jvm_memory_used_bytes{application=~\"$application\", instance=~\"$instance\", area=~\"heap|nonheap\"})",
+          "legendFormat": "{{area}}",
+          "refId": "A"
+        }
+      ],
+      "title": "JVM Memory Used (heap / nonheap)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Live threads",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+      "id": 4,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": [] } },
+      "targets": [
+        {
+          "expr": "avg(jvm_threads_live_threads{application=~\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "live",
+          "refId": "A"
+        }
+      ],
+      "title": "JVM Threads (live)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "CPU Usage (process)",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "id": 5,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "calcs": [] } },
+      "targets": [
+        {
+          "expr": "avg(process_cpu_usage{application=~\"$application\", instance=~\"$instance\"})",
+          "legendFormat": "cpu",
+          "refId": "A"
+        }
+      ],
+      "title": "Process CPU Usage",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "GC Pause (seconds) – rate over time",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 6,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": [] } },
+      "targets": [
+        {
+          "expr": "sum(rate(jvm_gc_pause_seconds_sum{application=~\"$application\", instance=~\"$instance\"}[5m]))",
+          "legendFormat": "gc_pause_s_per_s",
+          "refId": "A"
+        }
+      ],
+      "title": "GC Pause Rate (s/s)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "description": "Custom memory bloat gauges from OrderService (falls ENABLE_MEMORY_TEST genutzt wird)",
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "id": 7,
+      "options": { "legend": { "displayMode": "table", "placement": "bottom", "calcs": [] } },
+      "targets": [
+        {
+          "expr": "rideshare_order_memory_bloat_chunks{application=~\"$application\", instance=~\"$instance\"}",
+          "legendFormat": "chunks",
+          "refId": "A"
+        },
+        {
+          "expr": "rideshare_order_memory_bloat_bytes{application=~\"$application\", instance=~\"$instance\"}",
+          "legendFormat": "bytes",
+          "refId": "B"
+        }
+      ],
+      "title": "OrderService Memory Bloat (custom gauges)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["micrometer", "spring-boot", "rideshare"],
+  "templating": {
+    "list": [
+      {
+        "current": { "selected": false, "text": "rideshare-auto", "value": "rideshare-auto" },
+        "datasource": "Prometheus",
+        "definition": "label_values(rideshare_http_order_seconds_count, application)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "application",
+        "options": [],
+        "query": { "query": "label_values(rideshare_http_order_seconds_count, application)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "query"
+      },
+      {
+        "current": { "selected": false, "text": "All", "value": "$__all" },
+        "datasource": "Prometheus",
+        "definition": "label_values(rideshare_http_order_seconds_count{application=~\"$application\"}, instance)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "instance",
+        "options": [],
+        "query": { "query": "label_values(rideshare_http_order_seconds_count{application=~\"$application\"}, instance)", "refId": "StandardVariableQuery" },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-30m", "to": "now" },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m"],
+    "time_options": ["5m", "15m", "30m", "1h", "6h", "12h", "24h"]
+  },
+  "timezone": "",
+  "title": "RideShare Auto — Micrometer Overview",
+  "uid": null,
+  "version": 1,
+  "weekStart": ""
+}

@@ -1,0 +1,25 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: s3-backend
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./00_common/rustfs
+  prune: true
+  postBuild:
+    substituteFrom:
+    - kind: ConfigMap
+      name: cluster-config
+  sourceRef:
+    kind: GitRepository
+    name: flux-system-observability
+  healthChecks:
+    - apiVersion: helm.toolkit.fluxcd.io/v2
+      kind: HelmRelease
+      name: rustfs
+      namespace: rustfs
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: rustfs
+      namespace: rustfs

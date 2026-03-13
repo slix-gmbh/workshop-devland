@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app: rideshare
+    release: demo
+  name: rideshare
+  namespace: rideshare
+spec:
+  endpoints:
+  - interval: 15s
+    targetPort: 5000
+    scheme: http
+    path: /actuator/prometheus
+  namespaceSelector:
+    matchNames:
+    - rideshare
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - rideshare
+          - rideshare-lock
+          - rideshare-memory
+    #matchLabels:
+    #  app: rideshare

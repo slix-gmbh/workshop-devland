@@ -1,0 +1,51 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: beyla-config
+  namespace: beyla
+data:
+  beyla-config.yml: |-
+    #profile_port: 6060
+    trace_printer: "text"
+    #open_port: 8443
+    discovery:
+      instrument:
+        #- open_ports:
+        - k8s_namespace: "mythical"
+        - k8s_namespace: "rideshare"
+        - k8s_namespace: "envoy-gateway"
+        #   k8s_pod_labels:
+        #     instrument: obi
+        #- k8s_namespace: "google-demo"
+        - k8s_namespace: "postgres"
+        - k8s_namespace: "default"
+        - k8s_namespace: "otel-demo"
+    routes:
+      unmatched: heuristic
+    ebpf:
+      context_propagation: all
+    log_level: debug
+    network:
+      enable: true
+      #cidrs:
+      #  - 10.10.0.0/24
+      #  - 10.0.0.0/8
+      #  - 10.30.0.0/16
+    attributes:
+      kubernetes:
+        enable: true
+      select:
+        beyla_network_flow_bytes:
+          include:
+          - k8s.src.owner.name
+          - k8s.src.namespace
+          - k8s.dst.owner.name
+          - k8s.dst.namespace
+          - src.cidr
+          - dst.cidr
+    otel_traces_export:
+      endpoint: http://alloy.alloy.svc.cluster.local:4318
+    otel_metrics_export:
+      endpoint: http://alloy.alloy.svc.cluster.local:4318
+      features: ["application", "application_span", "application_host", "application_service_graph", "application_process", "network", "network_inter_zone"]
+      histogram_aggregation: explicit_bucket_histogram

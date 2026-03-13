@@ -1,0 +1,61 @@
+grafana:
+  enabled: false
+  forceDeployDashboards: true
+  forceDeployDatasources: false
+
+serviceMonitor:
+  enabled: true
+
+kubernetesServiceMonitors:
+  enabled: true
+
+nodeExporter:
+  enabled: true
+
+kubeProxy:
+  enabled: true
+
+kubeScheduler:
+  enabled: true
+
+kubeEtcd:
+  enabled: true
+
+kubeControllerManager:
+  enabled: true
+
+kubelet:
+  enabled: true
+
+kubeApiServer:
+  enabled: true
+
+coreDns:
+  enabled: true
+
+kubeDns:
+  enabled: false
+
+alertmanager:
+  enabled: true
+  alertmanagerSpec:
+    externalUrl: https://alertmanager.local.com
+    alertmanagerConfigSelector:
+      matchLabels:
+        app: alertmanagerdemo
+
+#Disbale rootFS in local System (only Docker)
+prometheus-node-exporter:
+  hostRootFsMount:
+    enabled: false
+
+prometheus:
+  enabled: true
+  prometheusSpec:
+    enableRemoteWriteReceiver: true
+    serviceMonitorSelector:
+      matchLabels:
+        release: demo
+    enableFeatures:
+    - exemplar-storage
+    - native-histograms

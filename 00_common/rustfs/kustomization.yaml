@@ -1,0 +1,16 @@
+resources:
+- namespace.yaml
+- helmrelease-rustfs.yaml
+- rustfs-admin-credentials.yaml
+- provision-job.yaml
+- httproute.yaml
+
+configMapGenerator:
+- name: values-rustfs
+  namespace: rustfs
+  files:
+  - values.yaml=values-rustfs.yaml
+  options:
+    disableNameSuffixHash: true
+    labels:
+      reconcile.fluxcd.io/watch: Enabled

@@ -1,0 +1,14 @@
+resources:
+- helmrelease-prometheus.yaml
+- namespace.yaml
+- httproute.yaml
+
+configMapGenerator:
+- name: values-prometheus
+  namespace: prometheus
+  files:
+  - values.yaml=values-prometheus.yaml
+  options:
+    disableNameSuffixHash: true
+    labels:
+      reconcile.fluxcd.io/watch: Enabled

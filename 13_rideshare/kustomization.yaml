@@ -1,0 +1,24 @@
+resources:
+  - deploy-rideshare-auto.yaml
+  - deploy-rideshare-auto-lock.yaml
+  - deploy-rideshare-auto-memory.yaml
+  - deploy-rideshare-load.yaml
+  - rideshare-service-load.yaml
+  - rideshare-service.yaml
+  - rideshare-service-lock.yaml
+  - rideshare-service-memory.yaml
+  - namespace.yaml
+  - httproute.yaml
+  - httproute-load.yaml
+  - servicemonitor.yaml
+
+configMapGenerator:
+  - name: rideshare-dashboards
+    namespace: rideshare
+    files:
+      - dashboard.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+        app.kubernetes.io/part-of: rideshare
+        app.kubernetes.io/component: monitoring

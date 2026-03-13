@@ -1,0 +1,14 @@
+resources:
+- helmrelease-beyla.yaml
+- beyla-config.yaml
+- namespace.yaml
+
+configMapGenerator:
+- name: values-beyla
+  namespace: beyla
+  files:
+  - values.yaml=values-beyla.yaml
+  options:
+    disableNameSuffixHash: true
+    labels:
+        reconcile.fluxcd.io/watch: Enabled

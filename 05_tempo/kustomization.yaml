@@ -1,0 +1,43 @@
+resources:
+- namespace.yaml
+- helmrelease-tempo.yaml
+- tempo-s3-credentials.yaml
+
+namespace: tempo
+
+commonLabels:
+    app.kubernetes.io/part-of: tempo
+    app.kubernetes.io/component: monitoring
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: values-tempo
+    namespace: tempo
+    files:
+    - values.yaml=values-tempo.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        reconcile.fluxcd.io/watch: Enabled
+  - name: tempo-dashboards1
+    files:
+      - dashboards/tempo-tenants.json
+      - dashboards/tempo-rollout-progress.json
+      - dashboards/tempo-resources.json
+      - dashboards/tempo-reads.json
+      - dashboards/tempo-writes.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+        app.kubernetes.io/part-of: tempo
+        app.kubernetes.io/component: monitoring
+  - name: tempo-dashboards2
+    files:
+      - dashboards/tempo-operational.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+        app.kubernetes.io/part-of: tempo
+        app.kubernetes.io/component: monitoring

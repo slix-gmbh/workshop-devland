@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rideshare-load
+  namespace: rideshare
+  labels:
+    app: rideshare-load
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rideshare-load
+  template:
+    metadata:
+      labels:
+        app: rideshare-load
+    spec:
+      containers:
+        - name: rideshare-load
+          image: fra.ocir.io/frsjez6mlvwx/slixpublic/ride-share-load:1.1.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi

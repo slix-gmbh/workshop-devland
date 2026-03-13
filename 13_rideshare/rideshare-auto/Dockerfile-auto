@@ -1,0 +1,31 @@
+FROM --platform=$BUILDPLATFORM sapmachine:21-jdk-headless AS builder
+
+WORKDIR /opt/app
+
+RUN apt-get update && apt-get install ca-certificates -y && update-ca-certificates 
+
+
+
+COPY gradlew .
+COPY gradle gradle
+RUN ./gradlew
+
+COPY build.gradle.kts settings.gradle.kts ./
+RUN ./gradlew dependencies --no-daemon
+
+COPY src src
+RUN ./gradlew assemble --no-daemon
+
+
+FROM sapmachine:21-jdk-headless
+
+RUN apt-get update && apt-get install ca-certificates -y && update-ca-certificates
+
+ENV RIDESHARE_LISTEN_PORT=5000
+EXPOSE 5000
+
+COPY --from=builder /opt/app/build/libs/rideshare-1.0-SNAPSHOT.jar /opt/app/build/libs/rideshare-1.0-SNAPSHOT.jar
+
+WORKDIR /opt/app
+
+CMD sh -c "exec java -Dserver.port=${RIDESHARE_LISTEN_PORT} -jar ./build/libs/rideshare-1.0-SNAPSHOT.jar"

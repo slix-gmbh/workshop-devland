@@ -1,0 +1,84 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rustfs-bucket-provision
+  namespace: rustfs
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: awscli
+          image: docker.io/amazon/aws-cli:2.33.6
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: 
+                secretKeyRef: 
+                  name: rustfs-admin-credentials
+                  key: access_key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: 
+                secretKeyRef: 
+                  name: rustfs-admin-credentials
+                  key: secret_key
+            - name: AWS_DEFAULT_REGION
+              value: de-frankfurt-1
+            - name: RUSTFS_ENDPOINT
+              value: "http://rustfs-svc:9000"   # Service/Port anpassen
+            - name: RUSTFS_BUCKETS
+              value: ${provisioningbuckets}
+          command: ["/bin/sh","-ec"]
+          args:
+            - |
+              if [ -z "$RUSTFS_BUCKETS" ]; then
+                echo "RUSTFS_BUCKETS is empty – nothing to do"
+                exit 0
+              fi
+
+              RETENTION_DAYS="3"
+              RULE_ID="default-retention"
+              PREFIX="default"
+
+              for bucket in $(echo "$RUSTFS_BUCKETS" | tr ',' ' '); do
+                echo "Ensuring bucket: $bucket"
+
+                if aws --endpoint-url "$RUSTFS_ENDPOINT" \
+                       s3api head-bucket \
+                       --bucket "$bucket" >/dev/null 2>&1; then
+                  echo "Bucket '$bucket' already exists"
+                else
+                  echo "Creating bucket '$bucket'"
+                  aws --endpoint-url "$RUSTFS_ENDPOINT" \
+                      s3api create-bucket \
+                      --bucket "$bucket"
+                fi
+
+                echo "Applying lifecycle retention to '$bucket' (Days=$RETENTION_DAYS, Prefix='${PREFIX}')"
+
+                # Lifecycle JSON bauen (Prefix optional)
+                cat > /tmp/lifecycle.json <<EOF
+              {
+                "Rules": [
+                  {
+                    "ID": "default-retention",
+                    "Status": "Enabled",
+                    "Filter": {},
+                    "Expiration": { "Days": 3 }
+                  }
+                ]
+              }
+              EOF
+
+                # Put überschreibt die Lifecycle-Konfiguration des Buckets (S3: genau eine Konfiguration pro Bucket)
+                aws --endpoint-url "$RUSTFS_ENDPOINT" \
+                    s3api put-bucket-lifecycle-configuration \
+                    --bucket "$bucket" \
+                    --lifecycle-configuration file:///tmp/lifecycle.json
+
+                # Optional: kurz verifizieren (hilft beim Debugging)
+                aws --endpoint-url "$RUSTFS_ENDPOINT" \
+                    s3api get-bucket-lifecycle-configuration \
+                    --bucket "$bucket" >/dev/null 2>&1 && echo "Lifecycle OK for $bucket" || echo "Lifecycle readback failed for $bucket"
+
+              done

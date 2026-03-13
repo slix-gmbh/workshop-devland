@@ -1,0 +1,162 @@
+loki:
+  # Configures the readiness probe for all of the Loki pods
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http-metrics
+    initialDelaySeconds: 30
+    timeoutSeconds: 1
+  image:
+    # -- The Docker registry
+    registry: docker.io
+    # -- Docker image repository
+    repository: grafana/loki
+    # -- Overrides the image tag whose default is the chart's appVersion
+    # TODO: needed for 3rd target backend functionality
+    # revert to null or latest once this behavior is relased
+    tag: 2.9.2
+    # -- Overrides the image tag with an image digest
+    digest: null
+    # -- Docker image pull policy
+    pullPolicy: IfNotPresent
+  # -- Common annotations for all deployments/StatefulSets
+  annotations: {}
+  # -- Common annotations for all pods
+  podAnnotations: {}
+  # -- Common labels for all pods
+  podLabels: {}
+  # -- The number of old ReplicaSets to retain to allow rollback
+  revisionHistoryLimit: 10
+  # -- The SecurityContext for Loki pods
+  podSecurityContext:
+    fsGroup: 10001
+    runAsGroup: 10001
+    runAsNonRoot: true
+    runAsUser: 10001
+  # -- The SecurityContext for Loki containers
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+    allowPrivilegeEscalation: false
+  # -- Should enableServiceLinks be enabled. Default to enable
+  enableServiceLinks: true
+  # -- Specify an existing secret containing loki configuration. If non-empty, overrides `loki.config`
+  existingSecretForConfig: "loki-config"
+  configStorageType: ConfigMap
+  # -- Name of the Secret or ConfigMap that contains the configuration (used for naming even if config is internal).
+  externalConfigSecretName: ""
+  
+serviceAccount:
+  # -- Specifies whether a ServiceAccount should be created
+  create: true
+  # -- Set this toggle to false to opt out of automounting API credentials for the service account
+  automountServiceAccountToken: true
+# RBAC configuration
+rbac:
+  # -- If pspEnabled true, a PodSecurityPolicy is created for K8s that use psp.
+  pspEnabled: false
+  # -- For OpenShift set pspEnabled to 'false' and sccEnabled to 'true' to use the SecurityContextConstraints.
+  sccEnabled: false
+# -- Section for configuring optional Helm test
+test:
+  enabled: false
+  
+# Monitoring section determines which monitoring features to enable
+monitoring:
+  # Dashboards for monitoring Loki
+  dashboards:
+    # -- If enabled, create configmap with dashboards for monitoring Loki
+    enabled: true
+
+  # Recording rules for monitoring Loki, required for some dashboards
+  rules:
+    # -- If enabled, create PrometheusRule resource with Loki recording rules
+    enabled: true
+    # -- Include alerting rules
+    alerting: true
+    
+  # ServiceMonitor configuration
+  serviceMonitor:
+    # -- If enabled, ServiceMonitor resources for Prometheus Operator are created
+    enabled: true
+  
+  selfMonitoring:
+    enabled: false
+    grafanaAgent:
+      installOperator: false
+  
+  # The Loki canary pushes logs to and queries from this loki installation to test
+  # that it's working correctly
+  lokiCanary:
+    enabled: false
+    # -- The name of the label to look for at loki when doing the checks.
+
+# Configuration for the write pod(s)
+write:
+  # -- Number of replicas for the write
+  replicas: 0
+
+# Configuration for the read pod(s)
+read:
+  # -- Number of replicas for the read
+  replicas: 0
+  
+# Configuration for the backend pod(s)
+backend:
+  # -- Number of replicas for the backend
+  replicas: 0
+  
+# Configuration for the single binary node(s)
+singleBinary:
+  # -- Number of replicas for the single binary
+  replicas: 1
+  targetModule: "all"
+  # -- Labels for single binary service
+  extraArgs: 
+  - -config.expand-env=true
+  # -- Environment variables to add to the write pods
+  extraEnv: 
+  - name: S3_ACCESSKEY
+    valueFrom:
+      secretKeyRef:
+        name: minio-s3-credentials
+        key: S3_ACCESS_KEY_ID
+  - name: S3_SECRETKEY
+    valueFrom:
+      secretKeyRef:
+        name: minio-s3-credentials
+        key: S3_SECRET_ACCESS_KEY
+  - name: S3_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: minio-s3-credentials
+        key: ENDPOINT
+  - name: S3_BUCKET
+    value: lokilogs
+  resources: {}
+  # -- Grace period to allow the single binary to shutdown before it is killed
+  terminationGracePeriodSeconds: 30
+  persistence:
+    # -- Enable StatefulSetAutoDeletePVC feature
+    enableStatefulSetAutoDeletePVC: true
+    # -- Enable persistent disk
+    enabled: true
+    # -- Size of persistent disk
+    size: 5Gi
+    storageClass: null
+    # -- Selector for persistent disk
+    selector: null
+
+ingress:
+  enabled: false
+
+memberlist:
+  service:
+    publishNotReadyAddresses: true
+# Configuration for the gateway
+gateway:
+  # -- Specifies whether the gateway should be enabled
+  enabled: false
+

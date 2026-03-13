@@ -1,0 +1,25 @@
+resources:
+- namespace.yaml
+- helmrelease-loki.yaml
+- loki-config.yaml
+- loki-s3-credentials.yaml
+
+namespace: loki
+
+commonLabels:
+    app.kubernetes.io/part-of: loki
+    app.kubernetes.io/component: monitoring
+
+generatorOptions:
+  disableNameSuffixHash: true
+  
+configMapGenerator:
+  - name: values-loki
+    namespace: loki
+    files:
+    - values.yaml=values-loki.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        reconcile.fluxcd.io/watch: Enabled
+  
