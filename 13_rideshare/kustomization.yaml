@@ -8,8 +8,6 @@ resources:
   - rideshare-service-lock.yaml
   - rideshare-service-memory.yaml
   - namespace.yaml
-  - httproute.yaml
-  - httproute-load.yaml
   - servicemonitor.yaml
 
 configMapGenerator:

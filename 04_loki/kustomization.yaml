@@ -1,6 +1,5 @@
 resources:
 - namespace.yaml
-- helmrelease-loki.yaml
 - loki-config.yaml
 - loki-s3-credentials.yaml
 

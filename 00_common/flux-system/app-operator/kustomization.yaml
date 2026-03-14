@@ -1,5 +1,0 @@
-resources:
-- namespace.yaml
-- fluxInstance.yaml
-- operatorResourceSet.yaml
-- git-repo-token.yaml

@@ -1,5 +1,0 @@
-resources:
-- gotk-components.yaml
-- git-repo-cluster.yaml
-- workshop-cluster.yaml
-- namespace.yaml

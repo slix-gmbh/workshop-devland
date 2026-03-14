@@ -1,5 +1,4 @@
 resources:
-- helmrelease-pyroscope.yaml
 - namespace.yaml
 
 namespace: pyroscope

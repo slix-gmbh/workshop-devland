@@ -1,6 +1,5 @@
 resources:
 - namespace.yaml
-- helmrelease-tempo.yaml
 - tempo-s3-credentials.yaml
 
 namespace: tempo

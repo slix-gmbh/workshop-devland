@@ -1,5 +1,4 @@
 resources:
-- helmrelease-beyla.yaml
 - beyla-config.yaml
 - namespace.yaml
 

@@ -1,0 +1,52 @@
+resources:
+- namespace.yaml
+
+namespace: alloy
+
+commonLabels:
+    app.kubernetes.io/part-of: alloy
+    app.kubernetes.io/component: monitoring
+
+generatorOptions:
+  disableNameSuffixHash: true
+  
+configMapGenerator:
+  - name: values-alloy-ds
+    namespace: alloy
+    files:
+    - values.yaml=values-alloy-ds.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        reconcile.fluxcd.io/watch: Enabled
+  - name: alloy-config-ds
+    files:
+    - config.river=alloy-config-ds.river
+    options:
+      disableNameSuffixHash: true
+      labels:
+        reconcile.fluxcd.io/watch: Enabled
+  - name: alloy-dashboards
+    files:
+      - dashboards/alloy-cluster-node.json
+      - dashboards/alloy-cluster-overview.json
+      - dashboards/alloy-controller.json
+      - dashboards/alloy-logs.json
+      - dashboards/alloy-opentelemetry.json
+      - dashboards/alloy-prometheus-remote-write.json
+      - dashboards/alloy-resources.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+        app.kubernetes.io/part-of: alloy
+        app.kubernetes.io/component: monitoring
+        kustomize.toolkit.fluxcd.io/substitute: disabled
+  - name: beyla-red-dashboards
+    files:
+      - dashboards/beyla-red-dashboard.json
+    options:
+      labels:
+        grafana_dashboard: "1"
+        app.kubernetes.io/part-of: alloy
+        app.kubernetes.io/component: monitoring
+        kustomize.toolkit.fluxcd.io/substitute: disabled
