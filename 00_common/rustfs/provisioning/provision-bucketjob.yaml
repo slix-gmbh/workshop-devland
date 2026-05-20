@@ -27,7 +27,7 @@ spec:
             - name: RUSTFS_ENDPOINT
               value: "http://rustfs-svc:9000"   # Service/Port anpassen
             - name: RUSTFS_BUCKETS
-              value: ${provisioningbuckets}
+              value: "loki,tempo,pyroscope"
           command: ["/bin/sh","-ec"]
           args:
             - |
