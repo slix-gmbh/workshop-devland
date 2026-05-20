@@ -152,7 +152,7 @@ pyroscope:
     storage:
       backend: s3
       s3:
-        endpoint: "myrustfs-svc.rustfs.svc.cluster.local:9000"
+        endpoint: "my-rustfs-svc.rustfs.svc.cluster.local:9000"
         bucket_name: pyroscope
         access_key_id: rustfsadmin
         secret_access_key: rustfsadmin
