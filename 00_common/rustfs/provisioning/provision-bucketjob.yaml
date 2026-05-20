@@ -25,7 +25,7 @@ spec:
             - name: AWS_DEFAULT_REGION
               value: de-frankfurt-1
             - name: RUSTFS_ENDPOINT
-              value: "http://rustfs-svc:9000"   # Service/Port anpassen
+              value: "http://myrustfs-svc:9000"   # Service/Port anpassen
             - name: RUSTFS_BUCKETS
               value: "loki,tempo,pyroscope"
           command: ["/bin/sh","-ec"]
