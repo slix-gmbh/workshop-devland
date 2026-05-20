@@ -24,7 +24,7 @@ reportingEnabled: false
 
 tempo:
   image:
-    tag: ${tempoversion:=2.10.5}
+    tag: 2.10.5
     pullPolicy: IfNotPresent
 
   structuredConfig: {}
