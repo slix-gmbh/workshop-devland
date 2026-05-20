@@ -4,11 +4,10 @@
 
 ```sh
 kubectl apply -f namespace.yaml
-kubectl apply -f loki-config.yaml -n loki
-kubectl apply -f loki-s3-credentials.yaml -n loki
+kubectl apply -f tempo-s3-credentials.yaml -n tempo
 helm repo add grafana-community https://grafana-community.github.io/helm-charts
 helm repo update
-helm install --values values-loki.yaml loki grafana/loki -n loki
+helm install --values values-loki.yaml tempo grafana-community/tempo-distributed -n tempo
 ```
 
 ## Flux
