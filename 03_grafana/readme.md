@@ -11,7 +11,7 @@ kubectl apply -f grafana-datasource.yaml -n grafana
 Dann per helm Grafana installieren
 
 ```yaml
-helm -n grafana upgrade --install grafana grafana/grafana -f grafana-values.yaml
+helm -n grafana upgrade --install grafana grafana/grafana -f values-grafana.yaml
 ```
 
 ## Prüfen
