@@ -7,7 +7,7 @@ Sehr leichtgewichtiges S3-Backend. Wird per helm installiert
 ```sh
 kubectl apply -f namespace.yaml
 helm repo add rustfs https://charts.rustfs.com
-helm install my-rustfs rustfs/rustfs --version 0.0.80
+helm install my-rustfs rustfs/rustfs --version 0.0.80 -f values-rustfs.yaml
 ```
 
 Informationen zum Helmchart:
