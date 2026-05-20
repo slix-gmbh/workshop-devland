@@ -1,14 +1,16 @@
 # 03 Grafana
 
-
 Secrets und Configmaps erstellen
 
-```
+```sh
+kubectl apply -f namespace.yaml
 kubectl apply -f grafana-credentials.yaml -n grafana
 kubectl apply -f grafana-datasource.yaml -n grafana
 ```
+
 Dann per helm Grafana installieren
-```
+
+```yaml
 helm -n grafana upgrade --install grafana grafana/grafana -f grafana-values.yaml
 ```
 
@@ -16,7 +18,7 @@ helm -n grafana upgrade --install grafana grafana/grafana -f grafana-values.yaml
 
 Ausgabe von Helm:
 
-```
+```yaml
 Release "grafana" does not exist. Installing it now.
 NAME: grafana
 LAST DEPLOYED: Wed Nov  6 11:09:01 2024
@@ -41,7 +43,8 @@ NOTES:
 ```
 
 Prüfen ob die Pods laufen
-```
+
+```sh
 kubectl get pods -n grafana
 
 NAME                       READY   STATUS    RESTARTS   AGE
@@ -51,20 +54,21 @@ grafana-5dc4f97996-ds2qk   6/6     Running   0          36s
 ## Grafana öffnen
 
 ### port-forward
+
 Ein port-forward einrichten
 
-```
+```sh
 kubectl port-forward svc/grafana 8081:80 -n grafana
 ```
 
-Dann im Browser [Grafana](http://localhost:8081) öffnen 
-
+Dann im Browser [Grafana](http://localhost:8081) öffnen
 
 ### Login
+
 Wird kein Passwort per Secret gesetzt
 dann das automatisch generierte Adminpasswort auslesen:
 
-```
+```sh
 kubectl get secret -n grafana grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 ```
 
