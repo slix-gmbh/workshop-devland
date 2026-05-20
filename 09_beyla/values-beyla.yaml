@@ -14,7 +14,7 @@ image:
   repository: grafana/beyla
   # -- (string) Beyla image tag. When empty, the Chart's appVersion is
   # used.
-  tag: 3.0.0
+  tag: 3.14.0
   # -- Beyla image's SHA256 digest (either in format "sha256:XYZ" or "XYZ"). When set, will override `image.tag`.
   digest: null
   # -- Beyla image pull policy.
