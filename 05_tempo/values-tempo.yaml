@@ -413,10 +413,10 @@ storage:
     # -- The supported storage backends are gcs, s3 and azure, as specified in https://grafana.com/docs/tempo/latest/configuration/#storage
     backend: s3
     s3:
-      access_key: $${ACCESS_KEY}
-      secret_key: $${SECRET_KEY}
+      access_key: ${ACCESS_KEY}
+      secret_key: ${SECRET_KEY}
       bucket: tempo
-      endpoint: $${ENDPOINT}
+      endpoint: ${ENDPOINT}
       insecure: true
     pool:
       # -- Total number of workers pulling jobs from the queue
