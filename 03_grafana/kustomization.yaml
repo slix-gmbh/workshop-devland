@@ -1,0 +1,17 @@
+resources:
+- namespace.yaml
+- helmrelease-grafana.yaml
+- grafana-datasource-prometheus.yaml
+- grafana-credentials.yaml
+
+namespace: grafana
+
+configMapGenerator:
+- name: values-grafana
+  namespace: grafana
+  files:
+  - values.yaml=values-grafana.yaml
+  options:
+    disableNameSuffixHash: true
+    labels:
+        reconcile.fluxcd.io/watch: Enabled

@@ -1,0 +1,114 @@
+image:
+  tag: 13.0.1+security-01
+# for high availability
+headlessService: true
+
+admin:
+  ## Name of the secret. Can be templated.
+  existingSecret: grafana-credentials
+  userKey: admin-user
+  passwordKey: admin-password
+
+env:
+  #GF_FEATURE_TOGGLES_ENABLE: "flameGraph traceqlSearch correlations metricsSummary traceqlEditor traceToMetrics traceToProfiles datatrails publicDashboards featureToggleAdminPage"
+  GF_FEATURE_TOGGLES_ENABLE: "correlations metricsSummary"
+  #GF_INSTALL_PLUGINS: "grafana-pyroscope-app"
+  #GF_AUTH_ANONYMOUS_ENABLED: true
+  #GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+  #GF_AUTH_DISABLE_LOGIN_FORM: true
+
+grafana.ini:
+  server:
+    domain: "{{ if (and .Values.ingress.enabled .Values.ingress.hosts) }}{{ .Values.ingress.hosts | first }}{{ else }}''{{ end }}"
+    root_url: https://grafana.local.com
+  paths:
+    data: /var/lib/grafana/
+    logs: /var/log/grafana
+    plugins: /var/lib/grafana/plugins
+    provisioning: /etc/grafana/provisioning
+  analytics:
+    check_for_updates: true
+  log:
+    mode: console
+  grafana_net:
+    url: https://grafana.net
+
+ingress:
+  enabled: false
+
+persistence:
+  type: pvc
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 5Gi
+
+serviceMonitor:
+  enabled: true
+
+sidecar:
+  enableUniqueFilenames: true
+  alerts:
+    enabled: true
+    labelValue: "1"
+    searchNamespace: "ALL"
+  datasources:
+    enabled: true
+    labelValue: "1"
+    searchNamespace: "ALL"
+  dashboards: 
+    enabled: true
+    labelValue: "1"
+    searchNamespace: "ALL"
+    provider:
+      allowUiUpdates: true
+  plugins:
+    enabled: true
+    labelValue: "1"
+    searchNamespace: "ALL"
+  notifiers:
+    enabled: true
+    labelValue: "1"
+    searchNamespace: "ALL"
+
+route:
+  main:
+    # -- Enables or disables the route
+    enabled: true
+
+    # -- Set the route apiVersion, e.g. gateway.networking.k8s.io/v1 or gateway.networking.k8s.io/v1alpha2
+    apiVersion: gateway.networking.k8s.io/v1
+    # -- Set the route kind
+    # Valid options are GRPCRoute, HTTPRoute, TCPRoute, TLSRoute, UDPRoute
+    kind: HTTPRoute
+
+    annotations: {}
+    labels: {}
+
+    hostnames: 
+    - grafana.local.com
+    parentRefs:
+    - name: eg
+      namespace: envoy-gateway
+      #sectionName: http
+
+    matches:
+      - path:
+          type: PathPrefix
+          value: /
+
+    ## Filters define the filters that are applied to requests that match this rule.
+    filters: []
+
+    ## Additional custom rules that can be added to the route
+    additionalRules: []
+
+#extraVolumeMounts:
+#- mountPath: /etc/grafana/provisioning/alerting
+#  name: grafana-alerting
+#  readOnly: false
+#extraContainerVolumes:
+#- name: grafana-alerting
+#  configMap:
+#    defaultMode: 420
+#    name: grafana-alerting

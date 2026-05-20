@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource
+  labels:
+    grafana_datasource: "1"
+data:
+  datasource.yaml: |-
+    apiVersion: 1
+    datasources:
+      - name: Alertmanager
+        type: alertmanager
+        uid: alertmanager
+        url: http://mimir-alertmanager.mimir.svc.cluster.local:9095
+        access: proxy
+        jsonData:
+          # Valid options for implementation include mimir, cortex and prometheus
+          implementation: prometheus
+          # Whether or not Grafana should send alert instances to this Alertmanager
+          handleGrafanaManagedAlerts: false
+        # optionally
+        basicAuth: false
+        #basicAuthUser: my_user
+        #secureJsonData:
+        #  basicAuthPassword: test_password
+      - name: Prometheus
+        type: prometheus
+        uid: mimir
+        url: http://prometheus-operated.prometheus.svc.cluster.local:9090
+        access: proxy
+        isDefault: true
+        jsonData:
+          timeInterval: 1m
+          exemplarTraceIdDestinations:
+            - datasourceUid: tempo
+              name: traceID
+          httpMethod: POST
+        # optionally
+        basicAuth: false
+        #basicAuthUser: my_user
+        #secureJsonData:
+        #  basicAuthPassword: test_password
+        editable: true
+      - name: Loki
+        type: loki
+        uid: loki
+        url: http://loki-gateway.loki.svc.cluster.local
+        access: proxy
+        isDefault: false
+        jsonData:
+          derivedFields:
+          - datasourceUid: tempo
+            matcherRegex: 'traceID=(\w+)'
+            name: traceID
+            url: '$${__value.raw}'
+        # optionally
+        basicAuth: false
+        editable: true
+      - name: Postgres
+        type: postgres
+        uid: postgres
+        url: postgres.postgres.svc.cluster.local:5432
+        user: postgres
+        jsonData:
+          database: postgres
+          sslmode: disable
+          postgresVersion: 1400
+        secureJsonData:
+          password: mythical
+      - name: Tempo
+        type: tempo
+        access: proxy
+        uid: tempo
+        editable: true
+        url: http://tempo-gateway.tempo.svc.cluster.local
+        jsonData:
+          httpMethod: GET
+          nodeGraph:
+            enabled: true
+          serviceMap:
+            datasourceUid: 'mimir'
+          tracesToLogs:
+            datasourceUid: loki
+            filterByTraceID: false
+            spanEndTimeShift: "500ms"
+            spanStartTimeShift: "-500ms"
+            # tags: ['beast']
+      - name: Pyroscope
+        type: grafana-pyroscope-datasource
+        uid: pyroscope
+        editable: true
+        access: proxy
+        isDefault: false
+        url: http://pyroscope.pyroscope.svc.cluster.local:4040
+        basicAuth: false
+        

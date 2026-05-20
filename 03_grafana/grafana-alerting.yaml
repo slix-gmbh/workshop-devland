@@ -1,0 +1,153 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alerting
+  labels:
+    grafana_alert: "1"
+data:
+  contactpoints.yaml: |-
+    apiVersion: 1
+    contactPoints:
+    - orgId: 1
+      name: Slack_channel
+      receivers:
+        - uid: default-receiver
+          type: slack
+          settings:
+            # Webhook URL to be filled in
+            url: "https://hooks.slack.com/services/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"
+            # We need to escape double curly braces for the tpl function.
+            text: '{{ template "slack.message" . }}'
+            title: '{{ template "slack.title" . }}'
+  alertrules.yaml: |-
+    apiVersion: 1
+    groups:
+    - orgId: 1
+      # <string, required> name of the rule group
+      name: javaland-group
+      # <string, required> name of the folder the rule group will be stored in
+      folder: javaland1
+      # <duration, required> interval that the rule group should evaluated at
+      interval: 60s
+      # <list, required> list of rules that are part of the rule group
+      rules:
+        # <string, required> unique identifier for the rule
+        - uid: javaland_rule_1
+          # <string, required> title of the rule that will be displayed in the UI
+          title: first-javaland-rule
+          # <string, required> which query should be used for the condition
+          condition: A
+          # <list, required> list of query objects that should be executed on each
+          #                  evaluation - should be obtained trough the API
+          data:
+            - refId: A
+              datasourceUid: '__expr__'
+              model:
+                conditions:
+                  - evaluator:
+                      params:
+                        - 3
+                      type: gt
+                    operator:
+                      type: and
+                    query:
+                      params:
+                        - A
+                    reducer:
+                      type: last
+                    type: query
+                datasource:
+                  type: __expr__
+                  uid: '__expr__'
+                expression: 1==1
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: A
+                type: math
+          # <string> UID of a dashboard that the alert rule should be linked to
+          #dashboardUid: my_dashboard
+          # <int> ID of the panel that the alert rule should be linked to
+          #panelId: 123
+          # <string> the state the alert rule will have when no data is returned
+          #          possible values: "NoData", "Alerting", "OK", default = NoData
+          noDataState: Alerting
+          # <string> the state the alert rule will have when the query execution
+          #          failed - possible values: "Error", "Alerting", "OK"
+          #          default = Alerting
+          # <duration, required> for how long should the alert fire before alerting
+          for: 30s
+          # <map<string, string>> a map of strings to pass around any data
+          annotations:
+            event: javaland2023
+          # <map<string, string> a map of strings that can be used to filter and
+          #                      route alerts
+          labels:
+            team: "demo-javaland"
+            severity: "warning"
+  notificationpolicy.yaml: |-
+    apiVersion: 1
+    policies:
+    - orgId: 1
+      receiver: grafana-default-email
+      group_by: ['...']
+      matchers:
+        - severity =~ "warning|critical"
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+      routes:
+      - receiver: Slack_channel
+        matchers:
+          - team = "demo-javaland"
+          - severity =~ "warning|critical"
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
+  template.yaml: |-
+    apiVersion: 1
+    templates:
+    - orgID: 1
+      name: slack.title
+      template: "{{ len .Alerts.Firing }} firing alert(s), {{ len .Alerts.Resolved }} resolved alert(s)"
+  template2.yaml: |-
+    apiVersion: 1
+    templates:
+    - orgID: 1
+      name: slack.print_alert
+      template: |-
+        [{{.Status}}] {{ .Labels.alertname }}
+        Labels: 
+        {{ range .Labels.SortedPairs -}}
+        - {{ .Name }}: {{ .Value }}
+        {{ end -}}
+        {{ if .Annotations -}}
+        Annotations:
+        {{ range .Annotations.SortedPairs -}}
+        - {{ .Name }}: {{ .Value }}
+        {{ end -}}
+        {{ end -}}
+        {{ if .SilenceURL -}}
+          Silence: {{ .SilenceURL }}
+        {{ end -}}
+        {{ if .DashboardURL -}}
+          Go to dashboard: {{ .DashboardURL }}
+        {{- end }}
+  template3.yaml: |-
+    apiVersion: 1
+    templates:
+    - orgID: 1
+      name: slack.message
+      template: |-
+        {{ if .Alerts.Firing -}}
+        {{ len .Alerts.Firing }} firing alert(s):
+        {{ range .Alerts.Firing }}
+        {{ template "slack.print_alert" . }}
+        {{ end -}}
+        {{ end }}
+        {{ if .Alerts.Resolved -}}
+        {{ len .Alerts.Resolved }} resolved alert(s):
+        {{ range .Alerts.Resolved }}
+        {{ template "slack.print_alert" .}}
+        {{ end -}}
+        {{ end }}
+        
